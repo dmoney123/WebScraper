@@ -1,0 +1,49 @@
+import sys
+import json
+import pandas as pd
+sys.path.append('/home/dmy/A7/src')
+from url_scrape import main as scrape_articles
+from argparse import ArgumentParser
+
+
+
+def main():
+
+
+    parser = ArgumentParser()
+    parser.add_argument('--output', type=str, default='/home/dmy/A7/data/articles.json', help='Path to save the JSON file')
+    args = parser.parse_args()
+    output_path = args.output
+
+    # Call the scraping function from url_scrape.py
+    df = scrape_articles()
+    
+    if df.empty:
+        print("No data to convert to JSON")
+        return
+    
+    # Create array structure with nested article_text
+    json_structure = []
+    for _, row in df.iterrows():
+        article_obj = {
+            'title': row['Headline'],
+            'publication_date': row['Published Date'],
+            'author': row['Author'],
+            'blurb': row['Blurb'],
+            'article_text': row['Article Text']
+        }
+        json_structure.append(article_obj)
+    
+
+    # Convert to JSON string
+    json_data = json.dumps(json_structure, indent=2, ensure_ascii=False)
+    
+    # Save to JSON file
+    json_path = output_path
+    with open(json_path, 'w', encoding='utf-8') as f:
+        f.write(json_data)
+    
+    return json_data
+
+if __name__ == '__main__':
+    main()
